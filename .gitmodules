@@ -1,0 +1,6 @@
+[submodule "libs/Local-Tacotron-2"]
+	path = libs/Local-Tacotron-2
+	url = https://github.com/matty1406/Local-Tacotron-2.git
+[submodule "libs/Local-Hifi-Gan"]
+	path = libs/Local-Hifi-Gan
+	url = https://github.com/matty1406/Local-Hifi-Gan.git
