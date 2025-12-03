@@ -50,6 +50,7 @@ class TTSConfig:
 class TTS:
     def __init__(self, config: Optional[TTSConfig] = None):
         self.config = config if config is not None else TTSConfig()
+        self.__post_init__()
         self.local_tts = LocalTTS(deviceType=self.config.device, tacotron_dir=self.config.tacotron_dir, hifigan_dir=self.config.hifigan_dir)
 
     def __post_init__(self):
@@ -84,7 +85,6 @@ class TTS:
 
         # Normalize text
         normalized_text = self._normalize_text(dialogue)
-        print(f"Normalized Text: {normalized_text}")
 
         # Find model
         tacotron_model = os.path.join(self.config.tacotron_dir, character)

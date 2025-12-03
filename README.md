@@ -46,7 +46,7 @@ The project uses Tacotron 2 and Hifi-GAN dependencies from forked versions of [j
 
 ## How To Use
 
-You use the module by importing both `TTSConfig` and `TTS` classes from `tts.py`. You can then create a configuration object and a TTS object, and use the `synthesize` method to generate speech. Here is a simple example:
+You use the module by importing both `TTSConfig` and `TTS` classes from `tts.py`. You can then create a configuration object and a TTS object, and use the `speak` method to generate speech. Here is a simple example:
 
 ```python
 # Example usage of the Local TTS Module
@@ -78,15 +78,15 @@ print(f"Audio generated at: {audio}")
 - `text_rule_settings`: A dictionary for text normalization settings. Defaults to all rules set to `True`.
     - `remove_tags`: Removes <> tags from the text. Default is `True`.
     - `split_percent`: Splits numbers like '50%' into '50 %'. Default is `True`.
-    - `split_percent_words`: Splits words with percent signs, like 'fifty%'. Default is `True`.
+    - `split_percent_words`: Splits words with percent signs, like 'fifty%' to 'fifty %'. Default is `True`.
     - `split_hashtag`: Splits numbers from hashtags, like '#1' to '# 1'. Default is `True`.
     - `split_hashtag_words`: Splits words from hashtags, like '#hello' to '# hello'. Default is `True`.
     - `split_g_suffix`: Splits 'G' from numbers, like '5G' to '5 G'. Default is `True`.
     - `fix_ellipsis`: Fixes spaces around ellipses, replacing 'hello...world' with 'hello... world'. Default is `True`.
 - `convert_hyphens`: Converts hyphens to spaces in the text. Default is `True`.
 - `enable_pronunciation`: Enables pronunciation dictionary using ARPAbet for better pronunciation. Default is `True`.
-- `enable_stroke_separation`: Helps fix intentional "strokes" (a stroke in the AI Show context is when a voice fails to speak correctly and never finishes the sentence) by using an EOS token. Default is `True`.
-- `tacotron_dir`: The directory path to the Tacotron 2 models. Default is `1_TACOTRON2_MODELS`.
+- `enable_stroke_prevention`: Helps fix intentional "strokes" (a stroke in the AI Show context is when a voice fails to speak correctly and never finishes the sentence) by using an EOS token. Default is `True`.
+- `tacotron_dir`: The directory path to the Tacotron 2 models. Default is `1_TACOTRON_MODELS`.
 - `hifigan_dir`: The directory path to the Hifi-GAN models. Default is `0_HIFIGAN_MODELS`.
 
 For best results, keep the default settings unless you have specific needs.
