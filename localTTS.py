@@ -45,14 +45,14 @@ class LocalTTS:
 
         self.__load_all_tacotron2(tacotron_dir)
         self.__load_all_hifigan(hifigan_dir)
-
-        hifigan2, h2, denoiser2 = self.__load_hifigan('SR_hifigan\Superres_Twilight_33000', 'config_32k')
+        
+        hifigan2, h2, denoiser2 = self.__load_hifigan(os.path.join('SR_hifigan', 'Superres_Twilight_33000'), 'config_32k')
         self.hifigan_models['Superres_Twilight_33000'] = (hifigan2, h2, denoiser2)
 
     def __load_pronounciation_dictionary(self) -> dict:
         """Loads the pronunciation dictionary from a file."""
         thisdict = {}
-        for line in reversed((open('CMU_DICTIONARY\merged.dict.txt', "r").read()).splitlines()):
+        for line in reversed((open(os.path.join('CMU_DICTIONARY', 'merged.dict.txt'), "r").read()).splitlines()):
             thisdict[(line.split(" ",1))[0]] = (line.split(" ",1))[1].strip()
         return thisdict
     
@@ -91,6 +91,7 @@ class LocalTTS:
             tacotron2_dir (str): Directory containing Tacotron2 model files.
         """
         for file in os.listdir(tacotron2_dir):
+            if file.startswith('.'): continue
             model_name = file.split('.')[0]
             model_path = os.path.join(tacotron2_dir, file)
             model, hparams = self.__load_tacotron2(model_path)
