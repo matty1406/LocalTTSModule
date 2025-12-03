@@ -138,3 +138,10 @@ You can join my show's Discord server for support and discussions:
 [![Join our Discord](https://img.shields.io/badge/Join-Discord-7289DA?logo=discord&style=for-the-badge)](https://discord.gg/qMzFAXhGsS)
 
 <img src="https://yt3.googleusercontent.com/mR8bnvrsRKHOBE9S3R2ooJEmgVEfCnBA8ch6ABrFiiboUPNgwKsNcsZDFHFdrlfk2EbLA8mXdZc=s160-c-k-c0x00ffffff-no-rj" alt="The Sans & Papyrus Show Profile" width="150"/>
+
+## To Do
+
+- ✅ Create basic module structure
+- ✅ Implement Tacotron 2 and Hifi-GAN integration
+- ✅ Create TTSConfig class for easy configuration
+- ❌ Add wrapper for JavaScript/Node.js projects
