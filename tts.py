@@ -5,6 +5,16 @@ from typing import Dict, List, Tuple, Callable, Optional
 
 from localTTS import LocalTTS
 
+TEXT_RULE_LIBRARY = {
+    "remove_tags":          (r"<.*?>", ""),
+    "split_percent":        (r"(\d+)(%)", r"\1 \2"),
+    "split_percent_words":  (r"([a-zA-Z]+)(%)", r"\1 \2"),
+    "split_hashtag":        (r"(#)(\d+)", r"\1 \2"),
+    "split_hashtag_words":  (r"(#)([a-zA-Z]+)", r"\1 \2"),
+    "split_g_suffix":       (r"(\d+)(G)", r"\1 \2"),
+    "fix_ellipsis":         (r"\.\.\.(\S)", r"... \1"),
+}
+
 # CONFIGURATION
 @dataclass
 class TextRule:
@@ -17,29 +27,23 @@ class TTSConfig:
     device: str = 'cpu'
 
     # Text normalization rules
-    text_rules: List[TextRule] = field(default_factory=lambda: [
-        TextRule(r"<.*?>", ""),                         # Remove TMP tags
-        TextRule(r"(\d+)(%)", r"\1 \2"),                # 50% → 50 %
-        TextRule(r"([a-zA-Z]+)(%)", r"\1 \2"),          # test% → test %
-        TextRule(r"(#)(\d+)", r"\1 \2"),                # #10 → # 10
-        TextRule(r"(#)([a-zA-Z]+)", r"\1 \2"),          # #test → # test
-        TextRule(r"(\d+)(G)", r"\1 \2"),                # 10G → 10 G
-    ])
+    text_rule_settings: Dict[str, bool] = field(default_factory=lambda: {
+        "remove_tags": True,
+        "split_percent": True,
+        "split_percent_words": True,
+        "split_hashtag": True,
+        "split_hashtag_words": True,
+        "split_g_suffix": True,
+        "fix_ellipsis": True,
+    })
 
     convert_hyphens: bool = True
-
-    # Pronunciation toggle
     enable_pronunciation: bool = True
-
-    # EOS toggle
     enable_stroke_prevention: bool = True
-
+    
     # Directories for models
     tacotron_dir: str = '1_TACOTRON_MODELS'
     hifigan_dir: str = '0_HIFIGAN_MODELS'
-
-    # Custom text pass
-    custom_processor: Optional[Callable[[str], str]] = None
 
 # Main TTS class
 
@@ -58,15 +62,12 @@ class TTS:
         result = text.strip()
 
         # Apply regex rules
-        for rule in self.config.text_rules:
-            result = re.sub(rule.pattern, rule.repl, result)
+        for name, (pattern, repl) in TEXT_RULE_LIBRARY.items():
+            if self.config.text_rule_settings.get(name, True):
+                result = re.sub(pattern, repl, result)
         
         if self.config.convert_hyphens:
             result = result.replace("-", " ")
-        
-        # Custom processing
-        if self.config.custom_processor:
-            result = self.config.custom_processor(result)
 
         return result
 
