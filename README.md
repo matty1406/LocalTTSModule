@@ -2,7 +2,7 @@
 
 LocalTTSModule is an open source Tacotron 2 Python module that can be easily implemented to any use case. It was created and made open source to assist AI Show developers use local TTS and/or transition from online services such as FakeYou, originally made for my own show, [The Sans & Papyrus Show](https://www.youtube.com/@SansAndPapyrusShow).
 
-It *should* be easy to implement into any Python project and has very little to learn to get started. It is designed to be a plug-and-play module for local TTS.
+It *should* be easy to implement into any Python project and has very little to learn to get started.
 
 The project uses Tacotron 2 and Hifi-GAN dependencies from forked versions of [justinjohn0306's Tacotron 2](https://github.com/justinjohn0306/TTS-TT2) and [justinjohn0306's Hifi-GAN](https://github.com/justinjohn0306/hifi-gan) repositories, which have been modified to work together in a simplified manner.
 
