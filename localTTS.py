@@ -25,11 +25,13 @@ from denoiser import Denoiser
 
 """LocalTTS: A class for local text-to-speech synthesis using Tacotron2 and HiFi-GAN models."""
 class LocalTTS:
-    def __init__(self, deviceType: str):
+    def __init__(self, deviceType: str, tacotron_dir: str = '1_TACOTRON_MODELS', hifigan_dir: str = '0_HIFIGAN_MODELS'):
         """
         Initializes the LocalTTS class by loading Tacotron2 and HiFi-GAN models.
         Args:
             deviceType (str): The device type to use ('cpu' or 'cuda').
+            tacotron_dir (str): Directory containing Tacotron2 model files.
+            hifigan_dir (str): Directory containing HiFi-GAN model files.
         """
 
         self.deviceType = deviceType
@@ -41,8 +43,8 @@ class LocalTTS:
         self.tacotron2_models = {}
         self.hifigan_models = {}
 
-        self.__load_all_tacotron2('1_TACOTRON_MODELS')
-        self.__load_all_hifigan('0_HIFIGAN_MODELS')
+        self.__load_all_tacotron2(tacotron_dir)
+        self.__load_all_hifigan(hifigan_dir)
 
         hifigan2, h2, denoiser2 = self.__load_hifigan('SR_hifigan\Superres_Twilight_33000', 'config_32k')
         self.hifigan_models['Superres_Twilight_33000'] = (hifigan2, h2, denoiser2)
@@ -152,7 +154,7 @@ class LocalTTS:
         denoiser = Denoiser(hifigan, mode='normal')
         return hifigan, h, denoiser
     
-    def infer(self, text : str, model_name : str, hifigan_model_name : str, output_file : str, pronounciation_dictionary : bool = True):
+    def infer(self, text : str, model_name : str, hifigan_model_name : str, output_file : str, pronounciation_dictionary : bool = True, EOS_Token : bool = True):
         """
         Performs inference to generate speech audio from the given text using specified models.
         Args:
@@ -161,14 +163,14 @@ class LocalTTS:
             hifigan_model_name (str): Name of the HiFi-GAN model to use.
             output_file (str): Path to save the generated audio file.
             pronounciation_dictionary (bool, optional): Whether to apply a pronunciation dictionary. Defaults to True.
+            EOS_Token (bool, optional): Whether to append an end-of-sentence token. Defaults to True.
         """
         if pronounciation_dictionary:
             # Apply pronunciation dictionary and ensure text ends with a period
-            text = self._apply_pronounciation_dictionary(text) + "."
+            text = self._apply_pronounciation_dictionary(text, EOS_Token=EOS_Token) + "."
         else:
             # Ensure text ends with a semicolon and period
             if text[-1] != ";": text=text+";" + "."
-
         # ---
         # Load models - Get the Tacotron2 and HiFi-GAN models based on model names, plus the super-resolution model
         # ---
