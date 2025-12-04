@@ -105,6 +105,41 @@ This is the main method to generate speech from text. The text can be any string
 
 The output path is where the resulting audio file will be saved. The method returns the path to the generated audio file. You can then use this audio file as needed in your application.
 
+### Node.js Wrapper
+
+A Node.js wrapper has been created to allow easy integration into JavaScript/Node.js projects. It uses child processes to run the Python TTS module in the background through standard input/output. You can use it by importing the `TTS` and `TTSConfig` classes from `tts.js`. Since it relies on the Python module, make sure you have Python and the required dependencies installed as per the instructions above.
+
+If your Python environment is in a virtual environment, you can specify the path to the virtual environment when creating the `TTS` object. If the virtual environment is in the same directory as the `tts.js` file, simply pass the name of the folder (e.g., `venv`) and it will automatically find the executable based on your operating system.
+
+Here's a simple example of how to use the Node.js wrapper:
+
+```javascript
+// Example usage of the Local TTS Module in Node.js
+
+const { TTS, TTSConfig } = require('./tts'); // Import the TTS module (adjust the path as necessary)
+
+// Create a TTS configuration
+const config = new TTSConfig({
+    device: 'cpu' // or 'cuda' if you have a GPU
+});
+
+// Initialize the TTS system
+const tts = new TTS(config);
+
+// Synthesize speech
+(async () => {
+    const audioPath = await tts.speak("Hello, this is a text-to-speech synthesis example.", "Character", "output.wav");
+    console.log(`Audio generated at: ${audioPath}`);
+})();
+```
+
+If you use ESM modules, you can import it like this:
+
+```javascript
+import pkg from './tts.js';
+const { TTS, TTSConfig } = pkg;
+```
+
 ## Specifications
 
 - **Programming Language**: Python 3.8+
@@ -144,4 +179,6 @@ You can join my show's Discord server for support and discussions:
 - ✅ Create basic module structure
 - ✅ Implement Tacotron 2 and Hifi-GAN integration
 - ✅ Create TTSConfig class for easy configuration
-- ❌ Add wrapper for JavaScript/Node.js projects
+- ✅ Add wrapper for JavaScript/Node.js projects
+
+*If you find any issues, inform me via Issues or Discord! I will continue to fix bugs but nothing else is planned for now.*
