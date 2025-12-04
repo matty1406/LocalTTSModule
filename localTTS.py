@@ -168,10 +168,11 @@ class LocalTTS:
         """
         if pronounciation_dictionary:
             # Apply pronunciation dictionary and ensure text ends with a period
-            text = self._apply_pronounciation_dictionary(text, EOS_Token=EOS_Token) + "."
+            text = self._apply_pronounciation_dictionary(text, EOS_Token=EOS_Token)
+            if EOS_Token: text=text+"."
         else:
             # Ensure text ends with a semicolon and period
-            if text[-1] != ";": text=text+";" + "."
+            if text[-1] != ";" and EOS_Token: text=text+";" + "."
         # ---
         # Load models - Get the Tacotron2 and HiFi-GAN models based on model names, plus the super-resolution model
         # ---

@@ -1,7 +1,7 @@
 import os
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Callable, Optional
+from typing import Dict, Optional
 
 from localTTS import LocalTTS
 
