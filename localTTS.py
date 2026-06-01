@@ -2,10 +2,11 @@ import torch
 import numpy as np
 import scipy.signal
 from scipy.signal import firwin, lfilter
-import resampy
+from scipy.io.wavfile import write
+#import resampy
+import soxr
 import json
 import os
-import soundfile as sf
 import sys
 
 # Ensure TTS-TT2 and HiFi-GAN are in your Python path
@@ -36,18 +37,23 @@ class LocalTTS:
 
         self.deviceType = deviceType
         self.device = torch.device(self.deviceType)
+        self.is_cuda = self.device.type == 'cuda'
         self.super_res = 3
 
         self.pronounciation_dict = self.__load_pronounciation_dictionary()
 
         self.tacotron2_models = {}
-        self.hifigan_models = {}
+        self.hifigan_models = {}    
 
         self.__load_all_tacotron2(tacotron_dir)
         self.__load_all_hifigan(hifigan_dir)
+
+        self.available_tacotron_models = set(self.tacotron2_models.keys())
+        self.available_hifigan_models = set(self.hifigan_models.keys())
         
         hifigan2, h2, denoiser2 = self.__load_hifigan(os.path.join('SR_hifigan', 'Superres_Twilight_33000'), 'config_32k')
         self.hifigan_models['Superres_Twilight_33000'] = (hifigan2, h2, denoiser2)
+        self.high_pass_filter = firwin(101, cutoff=10500, fs=h2.sampling_rate, pass_zero=False)
 
     def __load_pronounciation_dictionary(self) -> dict:
         """Loads the pronunciation dictionary from a file."""
@@ -111,7 +117,7 @@ class LocalTTS:
         hparams.max_decoder_steps = 3000
         hparams.gate_threshold = 0.25
         model = Tacotron2(hparams)
-        if self.deviceType == 'cuda':
+        if self.is_cuda:
             state_dict = torch.load(model_path, weights_only=True)['state_dict']
             model.load_state_dict(state_dict)
             _ = model.cuda().eval().half()
@@ -166,6 +172,15 @@ class LocalTTS:
             pronounciation_dictionary (bool, optional): Whether to apply a pronunciation dictionary. Defaults to True.
             EOS_Token (bool, optional): Whether to append an end-of-sentence token. Defaults to True.
         """
+        if model_name not in self.available_tacotron_models:
+            raise ValueError(f"Tacotron2 model not loaded: {model_name}")
+
+        if hifigan_model_name not in self.available_hifigan_models:
+            hifigan_model_name = "universal"
+
+        if hifigan_model_name not in self.available_hifigan_models:
+            raise ValueError(f"HiFi-GAN model not loaded: {hifigan_model_name}")
+
         if pronounciation_dictionary:
             # Apply pronunciation dictionary and ensure text ends with a period
             text = self._apply_pronounciation_dictionary(text, EOS_Token=EOS_Token)
@@ -182,18 +197,16 @@ class LocalTTS:
         # ---
 
         # ---
-        # Inference - With no_grad for efficiency
+        # Inference - With inference_mode for efficiency
         # ---
-        with torch.no_grad():
+        with torch.inference_mode():
             # Text to sequence conversion
             sequence = np.array(text_to_sequence(text, ['english_cleaners']))[None, :]
 
             # Move to device
-            if self.deviceType == 'cuda':
-                sequence = torch.autograd.Variable(torch.from_numpy(sequence)).cuda().long()
-            else:
-                sequence = torch.autograd.Variable(torch.from_numpy(sequence)).to(self.device).long()
-            _, mel_outputs_postnet, *_ = model.inference(sequence)
+            sequence = torch.as_tensor(sequence, device=self.device).long()
+
+            mel_outputs_postnet = model.inference_mel_only(sequence)
 
             # HiFi-GAN Vocoder - Convert mel spectrogram to audio waveform
             y_g_hat = hifigan(mel_outputs_postnet.float())
@@ -205,14 +218,13 @@ class LocalTTS:
             # Resampling and Super-Resolution - Upsample and apply super-resolution
             normalize = (MAX_WAV_VALUE / np.max(np.abs(audio_denoised))) ** 0.9
             audio_denoised = audio_denoised * normalize
-            wave = resampy.resample(
-                audio_denoised,
+            wave = soxr.resample(
+                audio_denoised.astype(np.float32, copy=False),
                 h.sampling_rate,
                 h2.sampling_rate,
-                filter="sinc_window",
-                window=scipy.signal.windows.hann,
-                num_zeros=8,
-            )
+                quality="HQ"
+            ).astype(np.float32, copy=False)
+
             wave_out = wave.astype(np.int16)
 
             # Super-Resolution HiFi-GAN
@@ -228,8 +240,11 @@ class LocalTTS:
             audio2_denoised = audio2_denoised.cpu().numpy().reshape(-1)
 
             # High-Frequency Filtering and Mixing
-            b = firwin(101, cutoff=10500, fs=h2.sampling_rate, pass_zero=False)
-            y = lfilter(b, [1.0], audio2_denoised)
+            y = lfilter(
+                self.high_pass_filter.astype(np.float32, copy=False),
+                np.array([1.0], dtype=np.float32),
+                audio2_denoised.astype(np.float32, copy=False)
+            )
             y *= self.super_res  # superres_strength
             y_out = y.astype(np.int16)
             y_padded = np.zeros(wave_out.shape)
@@ -238,5 +253,5 @@ class LocalTTS:
             sr_mix = sr_mix / normalize
 
             # Save output audio file
-            sf.write(output_file, sr_mix.astype(np.int16), h2.sampling_rate)
+            write(output_file, h2.sampling_rate, sr_mix.astype(np.int16))
             print(f"Audio saved to {output_file}")

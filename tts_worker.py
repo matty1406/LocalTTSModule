@@ -4,8 +4,8 @@ from tts import TTS, TTSConfig
 
 def log(msg):
     """Send log messages to stdout with a special prefix."""
-    sys.stdout.write(f"{msg}\n")
-    sys.stdout.flush()
+    sys.stderr.write(f"{msg}\n")
+    sys.stderr.flush()
 
 def send_json(data):
     """Send JSON messages to stdout with a special prefix."""

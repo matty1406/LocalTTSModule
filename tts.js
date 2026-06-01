@@ -107,6 +107,8 @@ class TTS {
     constructor(config = new TTSConfig(), venvPath = null) {
         /** @type {TTSConfig} */
         this.config = config;
+        /** @type {Object} */
+        this.configJSON = this.config.toJSON();
 
         // Determine Python executable
         this.pythonExec = venvPath ? getVenvPython(venvPath) : 'python';
@@ -164,7 +166,7 @@ class TTS {
                 dialogue,
                 character,
                 outputPath,
-                config: this.config.toJSON()
+                config: this.configJSON
             };
             this.proc.stdin.write(JSON.stringify(payload) + '\n');
         });
