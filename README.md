@@ -88,6 +88,7 @@ print(f"Audio generated at: {audio}")
 - `enable_stroke_prevention`: Helps fix intentional "strokes" (a stroke in the AI Show context is when a voice fails to speak correctly and never finishes the sentence) by using an EOS token. Default is `True`.
 - `tacotron_dir`: The directory path to the Tacotron 2 models. Default is `1_TACOTRON_MODELS`.
 - `hifigan_dir`: The directory path to the Hifi-GAN models. Default is `0_HIFIGAN_MODELS`.
+- `cmu_dict_dir`: The directory path to the CMU pronunciation dictionary. Default is `CMU_DICTIONARY`.
 
 For best results, keep the default settings unless you have specific needs.
 

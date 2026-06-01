@@ -2,8 +2,9 @@ import traceback
 import re
 from dataclasses import dataclass, field
 from typing import Dict, Optional
+from pathlib import Path
 
-from localTTS import LocalTTS
+from .localTTS import LocalTTS
 
 TEXT_RULE_LIBRARY = {
     "remove_tags":          (re.compile(r"<.*?>"), ""),
@@ -44,8 +45,9 @@ class TTSConfig:
     enable_stroke_prevention: bool = True
     
     # Directories for models
-    tacotron_dir: str = '1_TACOTRON_MODELS'
-    hifigan_dir: str = '0_HIFIGAN_MODELS'
+    tacotron_dir: str = field(default_factory=lambda: str(Path(__file__).parent / '1_TACOTRON_MODELS'))
+    hifigan_dir: str = field(default_factory=lambda: str(Path(__file__).parent / '0_HIFIGAN_MODELS'))
+    cmu_dict_dir: str = field(default_factory=lambda: str(Path(__file__).parent / 'CMU_DICTIONARY'))
 
 # Main TTS class
 
@@ -53,7 +55,7 @@ class TTS:
     def __init__(self, config: Optional[TTSConfig] = None):
         self.config = config if config is not None else TTSConfig()
         self.__post_init__()
-        self.local_tts = LocalTTS(deviceType=self.config.device, tacotron_dir=self.config.tacotron_dir, hifigan_dir=self.config.hifigan_dir)
+        self.local_tts = LocalTTS(deviceType=self.config.device, tacotron_dir=self.config.tacotron_dir, hifigan_dir=self.config.hifigan_dir, cmu_dict_dir=self.config.cmu_dict_dir)
 
     def __post_init__(self):
         # Ensure valid device

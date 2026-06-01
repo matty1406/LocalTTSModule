@@ -24,13 +24,14 @@ from denoiser import Denoiser
 
 """LocalTTS: A class for local text-to-speech synthesis using Tacotron2 and HiFi-GAN models."""
 class LocalTTS:
-    def __init__(self, deviceType: str, tacotron_dir: str = '1_TACOTRON_MODELS', hifigan_dir: str = '0_HIFIGAN_MODELS'):
+    def __init__(self, deviceType: str, tacotron_dir: str = '1_TACOTRON_MODELS', hifigan_dir: str = '0_HIFIGAN_MODELS', cmu_dict_dir: str = 'CMU_DICTIONARY'):
         """
         Initializes the LocalTTS class by loading Tacotron2 and HiFi-GAN models.
         Args:
             deviceType (str): The device type to use ('cpu' or 'cuda').
             tacotron_dir (str): Directory containing Tacotron2 model files.
             hifigan_dir (str): Directory containing HiFi-GAN model files.
+            cmu_dict_dir (str): Directory containing the CMU pronunciation dictionary.
         """
 
         self.deviceType = deviceType
@@ -38,7 +39,7 @@ class LocalTTS:
         self.is_cuda = self.device.type == 'cuda'
         self.super_res = 3
 
-        self.pronounciation_dict = self.__load_pronounciation_dictionary()
+        self.pronounciation_dict = self.__load_pronounciation_dictionary(cmu_dict_dir)
 
         self.tacotron2_models = {}
         self.hifigan_models = {}
@@ -53,10 +54,10 @@ class LocalTTS:
         self.hifigan_models['Superres_Twilight_33000'] = (hifigan2, h2, denoiser2)
         self.high_pass_filter = firwin(101, cutoff=10500, fs=h2.sampling_rate, pass_zero=False)
 
-    def __load_pronounciation_dictionary(self) -> dict:
+    def __load_pronounciation_dictionary(self, cmu_dict_dir: str) -> dict:
         """Loads the pronunciation dictionary from a file."""
         thisdict = {}
-        for line in reversed((open(os.path.join('CMU_DICTIONARY', 'merged.dict.txt'), "r").read()).splitlines()):
+        for line in reversed((open(os.path.join(cmu_dict_dir, 'merged.dict.txt'), "r").read()).splitlines()):
             thisdict[(line.split(" ",1))[0]] = (line.split(" ",1))[1].strip()
         return thisdict
     
