@@ -1,6 +1,6 @@
 import sys
 import json
-from tts import TTS, TTSConfig
+from .tts import TTS, TTSConfig
 
 def log(msg):
     """Send log messages to stdout with a special prefix."""
