@@ -24,7 +24,7 @@ from denoiser import Denoiser
 
 """LocalTTS: A class for local text-to-speech synthesis using Tacotron2 and HiFi-GAN models."""
 class LocalTTS:
-    def __init__(self, deviceType: str, tacotron_dir: str = '1_TACOTRON_MODELS', hifigan_dir: str = '0_HIFIGAN_MODELS', cmu_dict_dir: str = 'CMU_DICTIONARY'):
+    def __init__(self, deviceType: str, tacotron_dir: str = '1_TACOTRON_MODELS', hifigan_dir: str = '0_HIFIGAN_MODELS', cmu_dict_dir: str = 'CMU_DICTIONARY', superres_dir: str = 'SR_hifigan'):
         """
         Initializes the LocalTTS class by loading Tacotron2 and HiFi-GAN models.
         Args:
@@ -32,6 +32,7 @@ class LocalTTS:
             tacotron_dir (str): Directory containing Tacotron2 model files.
             hifigan_dir (str): Directory containing HiFi-GAN model files.
             cmu_dict_dir (str): Directory containing the CMU pronunciation dictionary.
+            superres_dir (str): Directory containing the super-resolution HiFi-GAN model files.
         """
 
         self.deviceType = deviceType
@@ -50,7 +51,7 @@ class LocalTTS:
         self.available_tacotron_models = set(self.tacotron2_models.keys())
         self.available_hifigan_models = set(self.hifigan_models.keys())
         
-        hifigan2, h2, denoiser2 = self.__load_hifigan(os.path.join('SR_hifigan', 'Superres_Twilight_33000'), 'config_32k')
+        hifigan2, h2, denoiser2 = self.__load_hifigan(os.path.join(superres_dir, 'Superres_Twilight_33000'), 'config_32k')
         self.hifigan_models['Superres_Twilight_33000'] = (hifigan2, h2, denoiser2)
         self.high_pass_filter = firwin(101, cutoff=10500, fs=h2.sampling_rate, pass_zero=False)
 

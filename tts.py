@@ -48,6 +48,7 @@ class TTSConfig:
     tacotron_dir: str = field(default_factory=lambda: str(Path(__file__).parent / '1_TACOTRON_MODELS'))
     hifigan_dir: str = field(default_factory=lambda: str(Path(__file__).parent / '0_HIFIGAN_MODELS'))
     cmu_dict_dir: str = field(default_factory=lambda: str(Path(__file__).parent / 'CMU_DICTIONARY'))
+    superres_dir: str = field(default_factory=lambda: str(Path(__file__).parent / 'SR_hifigan'))
 
 # Main TTS class
 
@@ -55,7 +56,7 @@ class TTS:
     def __init__(self, config: Optional[TTSConfig] = None):
         self.config = config if config is not None else TTSConfig()
         self.__post_init__()
-        self.local_tts = LocalTTS(deviceType=self.config.device, tacotron_dir=self.config.tacotron_dir, hifigan_dir=self.config.hifigan_dir, cmu_dict_dir=self.config.cmu_dict_dir)
+        self.local_tts = LocalTTS(deviceType=self.config.device, tacotron_dir=self.config.tacotron_dir, hifigan_dir=self.config.hifigan_dir, cmu_dict_dir=self.config.cmu_dict_dir, superres_dir=self.config.superres_dir)
 
     def __post_init__(self):
         # Ensure valid device

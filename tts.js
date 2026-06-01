@@ -65,6 +65,8 @@ class TTSConfig {
 
         this.tacotron_dir = cfg.tacotron_dir ?? '1_TACOTRON_MODELS';
         this.hifigan_dir = cfg.hifigan_dir ?? '0_HIFIGAN_MODELS';
+        this.cmu_dict_dir = cfg.cmu_dict_dir ?? 'CMU_DICTIONARY';
+        this.superres_dir = cfg.superres_dir ?? 'SR_hifigan';
 
         if (!['cpu', 'cuda'].includes(this.device)) {
             console.warn(`Invalid device '${this.device}'. Falling back to 'cpu'.`);
@@ -84,7 +86,9 @@ class TTSConfig {
             enable_pronunciation: this.enable_pronunciation,
             enable_stroke_prevention: this.enable_stroke_prevention,
             tacotron_dir: this.tacotron_dir,
-            hifigan_dir: this.hifigan_dir
+            hifigan_dir: this.hifigan_dir,
+            cmu_dict_dir: this.cmu_dict_dir,
+            superres_dir: this.superres_dir
         };
     }
 }
