@@ -184,6 +184,10 @@ You can join my show's Discord server for support and discussions:
 
 ### Updates
 
+- 1.0.2 - Reworked pronunciation processor:
+    - Added pronunciation dictionary support for stutter-style hyphenated words, such as `I-I'm` or `I-I`, which were previously not processed correctly. The processor now checks for these patterns and applies the correct ARPAbet pronunciation while preserving the stutter-style hyphens.
+    - Added suffix for `-y` words in the `convert_hyphens` text rule, which converts words like `word-y` to `wordy` for the pronunciation to be processed correctly.
+
 - 1.0.1 - Improved speed of inference:
     - Inference now only produces mel outputs with `inference_mel_only` instead of also producing gate and alignments.
     - Mel spectrogram uses absolute value (same math but faster), extremely minor output difference due to no more epsilon value.

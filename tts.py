@@ -17,6 +17,7 @@ TEXT_RULE_LIBRARY = {
 }
 
 HYPHENATED_WORD_RE = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?(?:-[A-Za-z]+(?:'[A-Za-z]+)?)+")
+MAX_STUTTER_PIECE_LENGTH = 3
 
 # CONFIGURATION
 @dataclass
@@ -82,15 +83,62 @@ class TTS:
 
         def convert_match(match: re.Match) -> str:
             token = match.group(0)
-            parts = token.split("-")
-            final_word = parts[-1].lstrip("'").lower()
+            original_parts = token.split("-")
+            parts = original_parts[:]
 
-            if final_word and all(final_word.startswith(part.lower()) for part in parts[:-1]):
+            has_y_suffix = (
+                len(parts) >= 2
+                and parts[-1].lower() == "y"
+                and len(parts[-2]) >= 2
+                and parts[-2].isalpha()
+            )
+
+            if has_y_suffix:
+                candidate_parts = parts[:-2] + [parts[-2] + parts[-1]]
+                candidate_final = candidate_parts[-1].lower()
+                candidate_prefixes = [part.lower() for part in candidate_parts[:-1]]
+
+                is_plain_suffix = len(original_parts) == 2
+
+                is_stutter_with_suffix = (
+                    candidate_prefixes
+                    and all(
+                        1 <= len(part) <= MAX_STUTTER_PIECE_LENGTH
+                        and candidate_final.startswith(part)
+                        for part in candidate_prefixes
+                    )
+                )
+
+                if is_plain_suffix or is_stutter_with_suffix:
+                    parts = candidate_parts
+
+            final_word = parts[-1].lstrip("'").lower()
+            prefix_parts = [part.lower() for part in parts[:-1]]
+
+            is_stutter = (
+                final_word
+                and prefix_parts
+                and all(
+                    1 <= len(part) <= MAX_STUTTER_PIECE_LENGTH
+                    and final_word.startswith(part)
+                    for part in prefix_parts
+                )
+            )
+
+            if is_stutter:
                 return token.replace("-", preserved_hyphen)
+            
+            if len(parts) == 1:
+                return parts[0]
 
             return token.replace("-", " ")
 
-        return HYPHENATED_WORD_RE.sub(convert_match, text).replace("-", " ").replace(preserved_hyphen, "-")
+        return (
+            HYPHENATED_WORD_RE
+            .sub(convert_match, text)
+            .replace("-", " ")
+            .replace(preserved_hyphen, "-")
+        )
 
     def speak(self, dialogue: str, character: str, output_path: str):
         """

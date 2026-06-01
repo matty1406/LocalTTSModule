@@ -22,6 +22,8 @@ from meldataset import mel_spectrogram, MAX_WAV_VALUE
 from models import Generator
 from denoiser import Denoiser
 
+from .pronunciation import PronunciationProcessor
+
 """LocalTTS: A class for local text-to-speech synthesis using Tacotron2 and HiFi-GAN models."""
 class LocalTTS:
     def __init__(self, deviceType: str, tacotron_dir: str = '1_TACOTRON_MODELS', hifigan_dir: str = '0_HIFIGAN_MODELS', cmu_dict_dir: str = 'CMU_DICTIONARY', superres_dir: str = 'SR_hifigan'):
@@ -40,7 +42,7 @@ class LocalTTS:
         self.is_cuda = self.device.type == 'cuda'
         self.super_res = 3
 
-        self.pronounciation_dict = self.__load_pronounciation_dictionary(cmu_dict_dir)
+        self.pronunciation = PronunciationProcessor(cmu_dict_dir)
 
         self.tacotron2_models = {}
         self.hifigan_models = {}
@@ -54,13 +56,6 @@ class LocalTTS:
         hifigan2, h2, denoiser2 = self.__load_hifigan(os.path.join(superres_dir, 'Superres_Twilight_33000'), 'config_32k')
         self.hifigan_models['Superres_Twilight_33000'] = (hifigan2, h2, denoiser2)
         self.high_pass_filter = firwin(101, cutoff=10500, fs=h2.sampling_rate, pass_zero=False)
-
-    def __load_pronounciation_dictionary(self, cmu_dict_dir: str) -> dict:
-        """Loads the pronunciation dictionary from a file."""
-        thisdict = {}
-        for line in reversed((open(os.path.join(cmu_dict_dir, 'merged.dict.txt'), "r").read()).splitlines()):
-            thisdict[(line.split(" ",1))[0]] = (line.split(" ",1))[1].strip()
-        return thisdict
     
     def _apply_pronounciation_dictionary(self, text : str, punctuation=r"!?,.;:'\"", EOS_Token=True) -> str:
         """
@@ -72,23 +67,11 @@ class LocalTTS:
             Returns:
             str: The processed text with pronunciation dictionary applied.
         """
-        out = ''
-        for word_ in text.split(" "):
-            word=word_; end_chars = ''; start_chars = ''
-            while any(elem in word for elem in punctuation) and len(word) > 1:
-                if word[-1] in punctuation: end_chars = word[-1] + end_chars; word = word[:-1]
-                else: break
-            while any(elem in word for elem in punctuation) and len(word) > 1:
-                if word[0] in punctuation: start_chars += word[0]; word = word[1:]
-                else: break
-            try:
-                word_arpa = self.pronounciation_dict[word.upper()]
-                word = "{" + str(word_arpa) + "}"
-            except KeyError: pass
-            out = (out + " " + start_chars + word + end_chars).strip()
-        
-        if EOS_Token and out[-1] != ";": out += ";"
-        return out
+        return self.pronunciation.apply(
+            text,
+            punctuation=punctuation,
+            eos_token=EOS_Token
+        )
     
     def __load_all_tacotron2(self, tacotron2_dir : str):
         """
