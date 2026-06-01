@@ -1,9 +1,7 @@
 import torch
 import numpy as np
-import scipy.signal
 from scipy.signal import firwin, lfilter
 from scipy.io.wavfile import write
-#import resampy
 import soxr
 import json
 import os
@@ -43,7 +41,7 @@ class LocalTTS:
         self.pronounciation_dict = self.__load_pronounciation_dictionary()
 
         self.tacotron2_models = {}
-        self.hifigan_models = {}    
+        self.hifigan_models = {}
 
         self.__load_all_tacotron2(tacotron_dir)
         self.__load_all_hifigan(hifigan_dir)
