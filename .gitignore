@@ -1,2 +1,5 @@
 .venv
 __pycache__/
+0_HIFIGAN_MODELS/
+1_TACOTRON_MODELS/
+CMU_DICTIONARY/
