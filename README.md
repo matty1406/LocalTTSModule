@@ -83,7 +83,7 @@ print(f"Audio generated at: {audio}")
     - `split_hashtag_words`: Splits words from hashtags, like '#hello' to '# hello'. Default is `True`.
     - `split_g_suffix`: Splits 'G' from numbers, like '5G' to '5 G'. Default is `True`.
     - `fix_ellipsis`: Fixes spaces around ellipses, replacing 'hello...world' with 'hello... world'. Default is `True`.
-- `convert_hyphens`: Converts hyphens to spaces in the text. Default is `True`.
+- `convert_hyphens`: Converts normal hyphenated text to spaces while preserving stutter-style hyphens, such as `I-I` or `I-I'm`. Default is `True`.
 - `enable_pronunciation`: Enables pronunciation dictionary using ARPAbet for better pronunciation. Default is `True`.
 - `enable_stroke_prevention`: Helps fix intentional "strokes" (a stroke in the AI Show context is when a voice fails to speak correctly and never finishes the sentence) by using an EOS token. Default is `True`.
 - `tacotron_dir`: The directory path to the Tacotron 2 models. Default is `1_TACOTRON_MODELS`.
@@ -180,5 +180,19 @@ You can join my show's Discord server for support and discussions:
 - ✅ Implement Tacotron 2 and Hifi-GAN integration
 - ✅ Create TTSConfig class for easy configuration
 - ✅ Add wrapper for JavaScript/Node.js projects
+
+### Updates
+
+- 1.0.1 - Improved speed of inference:
+    - Inference now only produces mel outputs with `inference_mel_only` instead of also producing gate and alignments.
+    - Mel spectrogram uses absolute value (same math but faster), extremely minor output difference due to no more epsilon value.
+    - STFT caching for faster performance.
+    - All `no_grad` contexts are now `torch.inference_mode` for faster performance.
+    - All data is now loaded as `float32` instead of `float64` for faster performance and lower VRAM usage.
+    - High pass filter is cached instead of being generated every time for faster performance.
+    - File I/O is now done with Scipy's `write` function instead of `soundfile` for faster performance.
+    - Resampling uses `sxor` instead of `resampy` for faster performance.
+    - Model checking is done with a set in the local TTS module instead of checking the directory every time for faster performance.
+    - Added to the `convert_hyphens` text rule to preserve stutter-style hyphens, such as `I-I` or `I-I'm`, while converting normal hyphenated text to spaces.
 
 *If you find any issues, inform me via Issues or Discord! I will continue to fix bugs but nothing else is planned for now.*

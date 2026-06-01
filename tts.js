@@ -38,7 +38,7 @@ class TTSConfig {
      * @param {Object} [cfg={}] User provided configuration
      * @param {"cpu"|"cuda"} [cfg.device="cpu"] Device to use for the TTS engine
      * @param {TextRuleSettings} [cfg.text_rule_settings] Toggle specific text processing rules
-     * @param {boolean} [cfg.convert_hyphens=true] Whether to convert hyphens to spaces in the input text
+     * @param {boolean} [cfg.convert_hyphens=true] Whether to convert normal hyphens to spaces while preserving stutter-style hyphens
      * @param {boolean} [cfg.enable_pronunciation=true] Whether to enable pronunciation dictionary
      * @param {boolean} [cfg.enable_stroke_prevention=true] Whether to enable EOS token / stroke prevention
      * @param {string} [cfg.tacotron_dir="1_TACOTRON_MODELS"] Directory for Tacotron models

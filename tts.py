@@ -15,6 +15,8 @@ TEXT_RULE_LIBRARY = {
     "fix_ellipsis":         (re.compile(r"\.\.\.(\S)"), r"... \1"),
 }
 
+HYPHENATED_WORD_RE = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?(?:-[A-Za-z]+(?:'[A-Za-z]+)?)+")
+
 # CONFIGURATION
 @dataclass
 class TextRule:
@@ -68,9 +70,24 @@ class TTS:
                 result = pattern.sub(repl, result)
         
         if self.config.convert_hyphens:
-            result = result.replace("-", " ")
+            result = self._convert_hyphens(result)
 
         return result
+
+    def _convert_hyphens(self, text: str) -> str:
+        preserved_hyphen = "\0"
+
+        def convert_match(match: re.Match) -> str:
+            token = match.group(0)
+            parts = token.split("-")
+            final_word = parts[-1].lstrip("'").lower()
+
+            if final_word and all(final_word.startswith(part.lower()) for part in parts[:-1]):
+                return token.replace("-", preserved_hyphen)
+
+            return token.replace("-", " ")
+
+        return HYPHENATED_WORD_RE.sub(convert_match, text).replace("-", " ").replace(preserved_hyphen, "-")
 
     def speak(self, dialogue: str, character: str, output_path: str):
         """
